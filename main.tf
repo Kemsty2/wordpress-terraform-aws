@@ -54,5 +54,6 @@ module "ecs" {
   rds-security-group          = module.rds.db_access_sg_id
   subnets                     = ["${module.vpc.subnet1-id}", "${module.vpc.subnet2-id}", "${module.vpc.subnet3-id}"]
   wordpress-image             = var.wordpress-image
-  ecs-target-group-arn        = module.ecs.ecs-target-group-arn
+  ecs-target-group-arn        = module.ec2.target_group_arn
+  lb-security-group           = module.ec2.lb_security_group
 }
