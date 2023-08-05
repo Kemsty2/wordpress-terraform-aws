@@ -9,8 +9,8 @@ terraform {
 
 # Configure the AWS Provider
 provider "aws" {
-  region  = "us-east-1"
-  profile = "AdministratorAccess-446559390680"
+  region  = var.aws-region
+  profile = var.aws-profile
 }
 
 module "vpc" {
@@ -19,6 +19,10 @@ module "vpc" {
 
 module "iam" {
   source = "./modules/iam"
+}
+
+module "log" {
+  source = "./modules/logs"
 }
 
 module "ec2" {
@@ -56,4 +60,6 @@ module "ecs" {
   wordpress-image             = var.wordpress-image
   ecs-target-group-arn        = module.ec2.target_group_arn
   lb-security-group           = module.ec2.lb_security_group
+  cloudwatch-log              = module.log.wordpress-log-name
+  aws-region                  = var.aws-region
 }

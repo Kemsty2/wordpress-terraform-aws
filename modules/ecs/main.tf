@@ -20,41 +20,43 @@ resource "aws_ecs_cluster" "wordpress_cluster" {
 }
 
 resource "aws_ecs_task_definition" "wordpress_task" {
-  family                   = "wordpress-app" # Naming our first task
-  container_definitions    = <<DEFINITION
-  [
-    {
-        "name": "wordpress-app",
-        "image": "${var.wordpress-image}",                       
-        "portMappings": [
-             {
-                 "hostPort": 80,
-                 "containerPort": 80,
-                 "protocol": "tcp"
-             }
-         ],        
-
-        "environment": [
-          {
-            "name": "WORDPRESS_DB_HOST",
-            "value": "${var.rds-url}"
-          },
-          {
-            "name": "WORDPRESS_DB_USER",
-            "value": "${var.rds-username}"
-          },
-          {
-            "name": "WORDPRESS_DB_PASSWORD",
-            "value": "${var.rds-password}"
-          },
-          {
-            "name": "WORDPRESS_DB_NAME",
-            "value": "${var.rds-dbname}"
-          }
-        ]
+  family = "wordpress-app" # Naming our first task
+  container_definitions = jsonencode([{
+    name  = "wordpress-app"
+    image = var.wordpress-image
+    portMappings = [{
+      hostPort      = 80
+      containerPort = 80
+      protocol      = "tcp"
+    }]
+    essential = true
+    environment = [
+      {
+        name  = "WORDPRESS_DB_HOST"
+        value = var.rds-url
+      },
+      {
+        name  = "WORDPRESS_DB_USER"
+        value = var.rds-username
+      },
+      {
+        name  = "WORDPRESS_DB_PASSWORD"
+        value = var.rds-password
+      },
+      {
+        name  = "WORDPRESS_DB_NAME"
+        value = var.rds-dbname
+      }
+    ]
+    logConfiguration = {
+      logDriver = "awslogs",
+      options = {
+        "awslogs-group"         = var.cloudwatch-log
+        "awslogs-region"        = var.aws-region
+        "awslogs-stream-prefix" = "ecs"
+      }
     }
-  ]
-  DEFINITION
+  }])
   requires_compatibilities = ["FARGATE"] # Stating that we are using ECS Fargate
   network_mode             = "awsvpc"    # Using awsvpc as our network mode as this is required for Fargate  
   memory                   = 512         # Specifying the memory our container requires
@@ -77,7 +79,7 @@ resource "aws_ecs_service" "wordpress_service" {
 
   network_configuration {
     subnets          = var.subnets
-    assign_public_ip = true                                                # Providing our containers with public IPs
-    security_groups  = ["${aws_security_group.service_security_group.id}"] # Setting the security group
+    assign_public_ip = true                                                                             # Providing our containers with public IPs
+    security_groups  = ["${aws_security_group.service_security_group.id}", "${var.rds-security-group}"] # Setting the security group
   }
 }

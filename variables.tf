@@ -3,6 +3,15 @@ variable "ecs-cluster-name" {
     default = "wordpress-cluster"
 }
 
+variable "aws-region" {
+  description = "The username for the Production database"
+  default = "us-east-1"
+}
+
+variable "aws-profile" {
+  description = "The username for the Production database"  
+}
+
 variable "wordpress-image" {
     description = "The wordpress image"
     default = "wordpress:latest"

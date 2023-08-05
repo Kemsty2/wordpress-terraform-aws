@@ -27,6 +27,8 @@ variable "rds-dbname" {}
 variable "wordpress-image" {}
 variable "ecs-target-group-arn" {}
 variable "lb-security-group" {}
+variable "cloudwatch-log" {}
+variable "aws-region" {}
 
 variable "subnets" {
   type = list(string)
